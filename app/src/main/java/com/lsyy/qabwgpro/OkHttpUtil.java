@@ -43,7 +43,7 @@ public class OkHttpUtil {
      * 自定义网络回调接口
      */
     public interface NetCall {
-        void success(Call call, Response response) throws IOException;
+        void success(Call call, String response) throws IOException;
 
         void failed(Call call, IOException e);
     }
@@ -149,7 +149,8 @@ public class OkHttpUtil {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                netCall.success(call, response);
+                String res=response.body().string();
+                netCall.success(call, res);
 
             }
         });
@@ -179,7 +180,8 @@ public class OkHttpUtil {
 
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
-                netCall.success(call, response);
+                String res=response.body().string();
+                netCall.success(call, res);
             }
         });
     }
@@ -253,7 +255,8 @@ public class OkHttpUtil {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                netCall.success(call, response);
+                String res=response.body().string();
+                netCall.success(call, res);
 
             }
         });

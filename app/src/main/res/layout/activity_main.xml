@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/skyblue">
+        android:background="@color/burlywood">
         <LinearLayout
             android:id="@+id/bt_title_back"
             android:layout_width="wrap_content"
@@ -45,13 +45,70 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@mipmap/background"/>
+        <ImageView
+            android:id="@+id/mine_weizhi"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:background="@mipmap/weizhi"/>
+        <LinearLayout
+            android:layout_gravity="right"
+            android:layout_margin="3dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/wan_background"
+            android:alpha="0.5"
+            android:orientation="vertical">
+            <ImageButton
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@mipmap/language"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="语言"/>
+            <ImageButton
+                android:layout_marginTop="5dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@mipmap/donload"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="离线"/>
+            <ImageButton
+                android:layout_marginTop="5dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@mipmap/clear"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清除"/>
+            <ImageButton
+                android:layout_marginTop="5dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@mipmap/off"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="自动"/>
+        </LinearLayout>
+        <ImageView
+            android:alpha="0.5"
+            android:layout_gravity="left"
+            android:id="@+id/image"
+            android:layout_width="100dp"
+            android:layout_height="150dp"
+            android:src="@drawable/animation" />
        <LinearLayout
            android:id="@+id/layout_daolan_small"
            android:alpha="0.5"
            android:layout_gravity="bottom"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
-           android:background="@color/white"
+           android:background="@color/burlywood"
            android:orientation="vertical">
            <ImageView
                android:id="@+id/bt_daolan_showContent"
@@ -59,7 +116,7 @@
                android:padding="5dp"
                android:layout_width="30dp"
                android:layout_height="30dp"
-               android:background="@mipmap/upup"/>
+               android:src="@mipmap/upup"/>
        </LinearLayout>
         <LinearLayout
             android:id="@+id/layout_daolan_dig"
@@ -68,40 +125,45 @@
             android:layout_height="500dp"
             android:layout_gravity="bottom"
             android:orientation="vertical"
-            android:background="@color/white">
+            android:background="#FFEFD5	">
             <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:id="@+id/bt_daolan_dismissContent"
                 android:layout_gravity="center"
                 android:padding="5dp"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@mipmap/downdown"/>
+                android:src="@mipmap/downdown"/>
             <ImageView
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:id="@+id/im_daolan_pic"
-                android:layout_gravity="center"
-                android:background="@mipmap/background"
-                android:layout_width="150dp"
+                android:src="@mipmap/pic"
+                android:scaleType="centerCrop"
+                android:layout_width="match_parent"
                 android:layout_height="150dp"/>
             <com.bigman.wmzx.customcardview.library.CardView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-
-
-                app:endColor="@color/white"
-                app:startColor="@color/black"
                 app:cardCornerRadius="5dp"
-                app:cardElevation="10dp"
-                app:topDelta="-1">
-                <TextView
-                    android:id="@+id/tv_daolan_str"
+                app:cardElevation="10dp">
+                <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="这是一段测试数据"/>
+                    android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/tv_daolan_str"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        android:text="这是一段测试数据"/>
+                </ScrollView>
             </com.bigman.wmzx.customcardview.library.CardView>
         </LinearLayout>
     </FrameLayout>
     <LinearLayout
+        android:alpha="0.5"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginRight="10dp"

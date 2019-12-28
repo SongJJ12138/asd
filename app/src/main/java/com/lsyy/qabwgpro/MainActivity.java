@@ -2,7 +2,7 @@ package com.lsyy.qabwgpro;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.joysuch.sdk.IndoorLocateListener;
@@ -31,7 +30,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Call;
-import okhttp3.Response;
 
 public class MainActivity extends Activity implements IndoorLocateListener, OkHttpUtil.NetCall {
     public static String TAG = "SMALLPIG";
@@ -49,18 +47,28 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     TextView tvDaolanStr;
     @BindView(R.id.layout_daolan_flame)
     FrameLayout layoutDaolanFlame;
-    @BindView(R.id.bt_daolan_play)
-    ImageView btDaolanPlay;
-    @BindView(R.id.tv_daolan_seekbar)
-    SeekBar tvDaolanSeekbar;
-    @BindView(R.id.tv_daolan_playtime)
-    TextView tvDaolanPlaytime;
-    @BindView(R.id.tv_daolan_alltime)
+    //    @BindView(R.id.bt_daolan_play)
+//    ImageView btDaolanPlay;
+//    @BindView(R.id.tv_daolan_seekbar)
+//    SeekBar tvDaolanSeekbar;
+//    @BindView(R.id.tv_daolan_playtime)
+//    TextView tvDaolanPlaytime;
+//    @BindView(R.id.tv_daolan_alltime)
     TextView tvDaolanAlltime;
     @BindView(R.id.layout_daolan_small)
     LinearLayout layoutDaolanSmall;
     @BindView(R.id.layout_daolan_dig)
     LinearLayout layoutDaolanDig;
+    @BindView(R.id.image)
+    ImageView image;
+    @BindView(R.id.mine_weizhi)
+    ImageView im_Weizhi;
+    @BindView(R.id.tv_daolan_seekbar)
+    SeekBar tvDaolanSeekbar;
+    @BindView(R.id.tv_daolan_playtime)
+    TextView tvDaolanPlaytime;
+//    @BindView(R.id.tv_daolan_alltime)
+//    TextView tvDaolanAlltime;
     //商户id
     private String ID;
     //产品id
@@ -68,33 +76,33 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     //产品详情
     private DaolanDetailsBean bean;
     //判断获取的数据是否为详细数据
-    private boolean isDetails=false;
+    private boolean isDetails = false;
+    private double x=50;
+    private double y=50;
     @SuppressLint("HandlerLeak")
-    private Handler handler=new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
-            switch (msg.what){
+            switch (msg.what) {
                 case 200:
-                    Response response= (Response) msg.obj;
+                    String response = (String) msg.obj;
                     try {
-                        if (isDetails){
-                            isDetails=false;
-                            Gson gson=new Gson();
-                            bean=gson.fromJson(response.body().string(),DaolanDetailsBean.class);
-                        }else{
-                            JSONObject jsonObject=new JSONObject(response.body().string());
-                            if (jsonObject!=null&&jsonObject.getString("status").equals("200")){
-                                product_id=1+"";
-                                isDetails=true;
-                                getData(ID+"/"+product_id);
-                            }else{
-                                Toast.makeText(getApplicationContext(),"数据请求失败，请稍后重试",Toast.LENGTH_LONG).show();
+                        if (isDetails) {
+                            isDetails = false;
+                            Gson gson = new Gson();
+                            bean = gson.fromJson(response, DaolanDetailsBean.class);
+                        } else {
+                            JSONObject jsonObject = new JSONObject(response);
+                            if (jsonObject != null && jsonObject.getString("status").equals("200")) {
+                                product_id = 1 + "";
+                                isDetails = true;
+                                getData(ID + "/" + product_id);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "数据请求失败，请稍后重试", Toast.LENGTH_LONG).show();
                                 MainActivity.this.finish();
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
@@ -103,6 +111,7 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
             }
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +121,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         bluetoothRadiusUtils.getInstance(getApplicationContext()).getRadius(this);
 //        Intent intent=getIntent();
 //        String id=intent.getStringExtra("ID");
-        ID=2452+"";
+        AnimationDrawable animationDrawable = (AnimationDrawable) image.getDrawable();
+        animationDrawable.start();
+        ID = 2452 + "";
         getData(ID);
         initMedia();
     }
@@ -125,13 +136,14 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
 
     /**
      * 获取导览数据
+     *
      * @param id
      */
     private void getData(String id) {
-        if (!isDetails){
-            OkHttpUtil.getInstance().getDataAsyn(Contents.HOST+Contents.GET_DALAN+id,this);
-        }else{
-            OkHttpUtil.getInstance().getDataAsyn(Contents.HOST+Contents.GET_DALAN_DETAILS+id,this);
+        if (!isDetails) {
+            OkHttpUtil.getInstance().getDataAsyn(Contents.HOST + Contents.GET_DALAN + id, this);
+        } else {
+            OkHttpUtil.getInstance().getDataAsyn(Contents.HOST + Contents.GET_DALAN_DETAILS + id, this);
         }
     }
 
@@ -143,38 +155,52 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         result += "Floor ID:" + String.valueOf(jsPosition.getFloorID()) + "\r\n";
         result += "X:" + String.valueOf(jsPosition.getxMeters()) + "\r\n";
         result += "Y:" + String.valueOf(jsPosition.getyMeters()) + "\r\n";
-        result += "Timestamp:" + String.valueOf(jsPosition.getTimeStampMillisecond()) + "\r\n";
+        changeView(jsPosition.getxMeters(), jsPosition.getyMeters());
+
     }
 
-    @OnClick({R.id.bt_title_back, R.id.bt_daolan_showContent, R.id.bt_daolan_dismissContent, R.id.bt_daolan_play})
+    private void changeView(double getxMeters, double getyMeters) {
+        int width = layoutDaolanFlame.getWidth();
+        int height = layoutDaolanFlame.getHeight();
+        FrameLayout.LayoutParams layoutParams= (FrameLayout.LayoutParams) im_Weizhi.getLayoutParams();
+        layoutParams.leftMargin= (int) (width/91*x);
+        layoutParams.topMargin= (int) (height/106*y);
+        x+=10;
+        y+=10;
+        im_Weizhi.requestLayout();
+    }
+
+    @OnClick({R.id.bt_title_back, R.id.bt_daolan_showContent, R.id.bt_daolan_dismissContent})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.bt_title_back:
                 this.finish();
                 break;
             case R.id.bt_daolan_showContent:
-                AnimationUtil.startAlphaAnima(layoutDaolanSmall,1,0);
-                AnimationUtil.startAlphaAnima(layoutDaolanDig,0,1);
+                AnimationUtil.startAlphaAnima(layoutDaolanSmall, 1, 0);
+                AnimationUtil.startAlphaAnima(layoutDaolanDig, 0, 1);
                 break;
             case R.id.bt_daolan_dismissContent:
-                AnimationUtil.startAlphaAnima(layoutDaolanSmall,0,1);
-                AnimationUtil.startAlphaAnima(layoutDaolanDig,1,0);
+                AnimationUtil.startAlphaAnima(layoutDaolanSmall, 0, 1);
+                AnimationUtil.startAlphaAnima(layoutDaolanDig, 1, 0);
                 break;
-            case R.id.bt_daolan_play:
-                break;
+//            case R.id.bt_daolan_play:
+//                break;
         }
     }
 
+
     @Override
-    public void success(Call call, Response response) throws IOException {
-            Message msg=new Message();
-            msg.what=200;
-            msg.obj=response;
-            handler.sendMessage(msg);
+    public void success(Call call, String response) throws IOException {
+        Message msg = new Message();
+        msg.what = 200;
+        msg.obj = response;
+        handler.sendMessage(msg);
     }
 
     @Override
     public void failed(Call call, IOException e) {
         handler.sendEmptyMessage(404);
     }
+
 }
