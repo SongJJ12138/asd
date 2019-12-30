@@ -28,28 +28,24 @@ public class bluetoothRadiusUtils {
 //        JSLocateManager.getInstance().setOfflineMode();//定位数据内置APP情况
 //        JSLocateManager.getInstance().setRootFolderName("Joysuch");//自定义数据存储文件夹
         jsLocateManager=JSLocateManager.getInstance();
+        jsLocateManager.init(context);
     }
     /**
      * 单例封装
      * @return
      */
     public static bluetoothRadiusUtils getInstance(Context context) {
-        try {
-            if (null == bluetoothRadiusUtils) {
-                // 模拟在创建对象之前做一些准备工作
-                Thread.sleep(1000);
-                synchronized (bluetoothRadiusUtils.class) {
-                    if(null == bluetoothRadiusUtils) {
-                        bluetoothRadiusUtils = new bluetoothRadiusUtils(context);
-                    }
+        if (null == bluetoothRadiusUtils) {
+            synchronized (bluetoothRadiusUtils.class) {
+                if(null == bluetoothRadiusUtils) {
+                    bluetoothRadiusUtils = new bluetoothRadiusUtils(context);
                 }
             }
-        } catch (InterruptedException e) {
-            // TODO: handle exception
         }
         return bluetoothRadiusUtils;
     }
     public void getRadius(IndoorLocateListener indoorLocateListener){
+
         jsLocateManager.setOnIndoorLocateListener(indoorLocateListener);
         jsLocateManager.setLocateTimesSecond(2);
         jsLocateManager.start();
