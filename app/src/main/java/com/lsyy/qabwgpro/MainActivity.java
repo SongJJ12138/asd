@@ -2,11 +2,15 @@ package com.lsyy.qabwgpro;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -17,9 +21,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.joysuch.sdk.IndoorLocateListener;
-import com.joysuch.sdk.locate.JSLocateManager;
 import com.joysuch.sdk.locate.JSPosition;
 
 import org.json.JSONException;
@@ -32,7 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Call;
 
-public class MainActivity extends Activity implements IndoorLocateListener, OkHttpUtil.NetCall, MediaPlayerHolder.PlaybackInfoListener {
+public class MainActivity extends Activity implements IndoorLocateListener, OkHttpUtil.NetCall, MediaPlayerHolder.PlaybackInfoListener, SeekBar.OnSeekBarChangeListener {
     public static String TAG = "SMALLPIG";
     @BindView(R.id.bt_title_back)
     LinearLayout btTitleBack;
@@ -65,8 +69,10 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     TextView tvDaolanPlaytime;
     @BindView(R.id.tv_daolan_alltime)
     TextView tvDaolanAlltime;
+    @BindView(R.id.im_background)
+    ImageView imBackground;
     //语言分类
-    private int LanguageType =1;
+    private int LanguageType = 1;
     //商户id
     private String ID;
     //产品id
@@ -79,8 +85,8 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     private MediaPlayerHolder mediaPlayerIngHolder;
     //当前所在将节点数据
     private DaolanDetailsBean.DataBean dataBean;
-    private double Staticx=0;
-    private double Staticy=0;
+    private double Staticx = 0;
+    private double Staticy = 0;
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -93,6 +99,7 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                             isDetails = false;
                             Gson gson = new Gson();
                             bean = gson.fromJson(response, DaolanDetailsBean.class);
+                            addSite(bean);
                         } else {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject != null && jsonObject.getString("status").equals("200")) {
@@ -108,11 +115,43 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                         e.printStackTrace();
                     }
                     break;
+                case 202:
+                    int position= (int) msg.obj;
+                    tvDaolanSeekbar.setProgress(position);
+                    if (position==0){
+                        tvDaolanPlaytime.setText("00 : 00");
+                    }else{
+                        String ttt=getTime(position);
+                        tvDaolanPlaytime.setText(ttt);
+                    }
+                    break;
                 case 404:
                     break;
             }
         }
     };
+
+    private void addSite(DaolanDetailsBean bean) {
+        ViewGroup group = findViewById(R.id.layout_daolan_flame);
+        for (DaolanDetailsBean.DataBean data : bean.getData()) {
+            ImageView imageView = new ImageView(getApplicationContext());
+            imageView.setBackground(getResources().getDrawable(R.mipmap.red));
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+            params.width =20;
+            params.height =20;
+            int width = layoutDaolanFlame.getWidth();
+            int height = layoutDaolanFlame.getHeight();
+//            float xx = (float) ((width / 91) * 91);
+//            float yy = (float) ((height / 106) *106);
+            float xx = (float) ((width / 91) * Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLongitude() : 0 + ""));
+            float yy = (float) ((height / 106) * Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLatitude() : 0 + ""));
+           if (xx==0||yy==0){break;}
+            imageView.setTranslationX(xx);
+            imageView.setTranslationY(yy);
+            imageView.setLayoutParams(params);
+            group.addView(imageView);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +167,7 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         ID = 2452 + "";
         getData(ID);
         initMedia();
+        tvDaolanSeekbar.setOnSeekBarChangeListener(this);
     }
 
     /**
@@ -160,7 +200,7 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         result += "X:" + String.valueOf(jsPosition.getxMeters()) + "\r\n";
         result += "Y:" + String.valueOf(jsPosition.getyMeters()) + "\r\n";
         changeView(jsPosition.getxMeters(), jsPosition.getyMeters());
-        if (checkAddress(jsPosition.getxMeters(), jsPosition.getyMeters())){
+        if (checkAddress(jsPosition.getxMeters(), jsPosition.getyMeters())) {
             changeSite();
         }
     }
@@ -169,34 +209,45 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      * 更换降解点
      */
     private void changeSite() {
-        if (mediaPlayerIngHolder.isPlaying()){
+        if (mediaPlayerIngHolder.isPlaying()) {
             mediaPlayerIngHolder.release();
         }
-        switch (LanguageType){
-            case 1: mediaPlayerIngHolder.loadMedia(dataBean.getChineseBoy());break;
-            case 2:mediaPlayerIngHolder.loadMedia(dataBean.getChineseGirl());break;
-            case 3:mediaPlayerIngHolder.loadMedia(dataBean.getEnglishBoy());break;
-            case 4:mediaPlayerIngHolder.loadMedia(dataBean.getEnglishGirl());break;
-            default:break;
+        switch (LanguageType) {
+            case 1:
+                String url="http://www.guolaiwan.net/file"+dataBean.getChineseBoy();
+                mediaPlayerIngHolder.loadMedia(url);
+                break;
+            case 2:
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getChineseGirl());
+                break;
+            case 3:
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getEnglishBoy());
+                break;
+            case 4:
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getEnglishGirl());
+                break;
+            default:
+                break;
         }
     }
 
     /**
      * 监听是否更换音频
+     *
      * @return
      */
-    private Boolean checkAddress(double x, double y ) {
+    private Boolean checkAddress(double x, double y) {
         //判断移动距离是否大于0.5m
-        if (AddressUtils.distance(x,y,Staticx,Staticy)>0.5){
+        if (AddressUtils.distance(x, y, Staticx, Staticy) > 0.5) {
             //分别判断距离是否在范围内
-            for (DaolanDetailsBean.DataBean bean:bean.getData()){
-                Double childX=Double.parseDouble(bean.getChildLatitude());
-                Double childY=Double.parseDouble(bean.getChildLongitude());
-                if (AddressUtils.distance(x,y,childX,childY)>0.5){
+            for (DaolanDetailsBean.DataBean bean : bean.getData()) {
+                Double childX = Double.parseDouble(bean.getChildLatitude());
+                Double childY = Double.parseDouble(bean.getChildLongitude());
+                if (AddressUtils.distance(x, y, childX, childY) > 0.5) {
                     //判断角度是否合适
-                    int range=AddressUtils.disrange(x,y,Staticx,Staticy);
-                    if (range>(int)bean.getStartAngle()&&range<(int)bean.getEndAngle()){
-                        dataBean=bean;
+                    int range = AddressUtils.disrange(x, y, Staticx, Staticy);
+                    if (range > Integer.parseInt(bean.getStartAngle()) && range < Integer.parseInt(bean.getEndAngle())) {
+                        dataBean = bean;
                         return true;
                     }
                 }
@@ -207,30 +258,32 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
 
     /**
      * 更改定位显示
+     *
      * @param getxMeters
      * @param getyMeters
      */
     private void changeView(double getxMeters, double getyMeters) {
         int width = layoutDaolanFlame.getWidth();
         int height = layoutDaolanFlame.getHeight();
-        LinearLayout.LayoutParams layoutParams= (LinearLayout.LayoutParams) im_Weizhi.getLayoutParams();
-        int xx=(int)(width/91*getxMeters);
-        int yy=(int)(height/106*getyMeters);
+        int xx = (int) (width / 91 * getxMeters);
+        int yy = (int) (height / 106 * getyMeters);
         im_Weizhi.setTranslationX(xx);
         im_Weizhi.setTranslationY(yy);
     }
 
-    @OnClick({R.id.bt_title_back, R.id.bt_daolan_showContent, R.id.bt_daolan_dismissContent})
+    @OnClick({R.id.bt_title_back, R.id.bt_daolan_showContent,R.id.bt_daolan_play, R.id.bt_daolan_dismissContent})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.bt_title_back:
                 this.finish();
                 break;
             case R.id.bt_daolan_showContent:
-                if (dataBean==null){
-                    Toast.makeText(getApplicationContext(),"还未到讲解点哦！",Toast.LENGTH_SHORT).show();
-                }else{
-//                    imDaolanPic.setBackground();
+                if (dataBean == null) {
+                    Toast.makeText(getApplicationContext(), "还未到讲解点哦！", Toast.LENGTH_SHORT).show();
+                } else {
+                    Glide.with(getApplicationContext())
+                            .load(dataBean.getChildPic())
+                            .into(imDaolanPic);
                     tvDaolanStr.setText(dataBean.getChineseContent());
                     AnimationUtil.startAlphaAnima(layoutDaolanSmall, 1, 0);
                     AnimationUtil.startAlphaAnima(layoutDaolanDig, 0, 1);
@@ -240,8 +293,18 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                 AnimationUtil.startAlphaAnima(layoutDaolanSmall, 0, 1);
                 AnimationUtil.startAlphaAnima(layoutDaolanDig, 1, 0);
                 break;
-//            case R.id.bt_daolan_play:
-//                break;
+            case R.id.bt_daolan_play:
+                if (mediaPlayerIngHolder.isPlaying()){
+                    mediaPlayerIngHolder.pause();
+                }else{
+                    if (dataBean==null){
+                        Toast.makeText(getApplicationContext(), "还未到讲解点哦！", Toast.LENGTH_SHORT).show();
+                    }else{
+                        mediaPlayerIngHolder.play();
+                    }
+
+                }
+                break;
         }
     }
 
@@ -259,23 +322,88 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         handler.sendEmptyMessage(404);
     }
 
+    /**
+     * 时间转换
+     * @param duration
+     * @return
+     */
+    private String getTime(int duration) {
+        int time=duration/1000;
+        int min=time/60;
+        int second=time%60;
+        if (min>10){
+            if (second>=10){
+                return min+" : "+second;
+            }else{
+                return min+" : 0"+second;
+            }
+        }else if(min>1&&min<10){
+            if (second>=10){
+                return "0"+min+" : "+second;
+            }else{
+                return "0"+min+" : 0"+second;
+            }
+        }else{
+            if (second>=10){
+                return "00"+" : "+second;
+            }else{
+                return "00"+" : 0"+second;
+            }
+        }
+    }
     @Override
     public void onDurationChanged(int duration) {
-
+        tvDaolanAlltime.setText(getTime(duration));
+        tvDaolanPlaytime.setText("00 : 00");
+        mediaPlayerIngHolder.play();
+        btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.pause));
+        tvDaolanSeekbar.setMax(duration);
     }
+
+
 
     @Override
     public void onPositionChanged(int position) {
+        Message msg=new Message();
+        msg.what=202;
+        msg.obj=position;
+        handler.sendMessage(msg);
 
     }
-
+//    public static int PLAYSTATUS0=0;//正在播放
+//    public static int PLAYSTATUS1=1;//暂停播放
+//    public static int PLAYSTATUS2=2;//重置
+//    public static int PLAYSTATUS3=3;//播放完成
+//    public static int PLAYSTATUS4=4;//媒体流装载完成
+//    public static int PLAYSTATUS5=5;//媒体流加载中
+//    public static int PLAYSTATUSD1=-1;//错误
     @Override
     public void onStateChanged(int state) {
-
+        switch (state){
+            case 0: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.pause)); break;
+            case 1: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
+            case 2: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
+            case 3: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
+        }
     }
 
     @Override
     public void onPlaybackCompleted() {
 
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mediaPlayerIngHolder.seekTo(seekBar.getProgress());
     }
 }

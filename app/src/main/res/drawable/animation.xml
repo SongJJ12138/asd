@@ -5,16 +5,10 @@
     <!--通过Android动画集播放的八十张图片-->
     <item
         android:drawable="@mipmap/image1"
-        android:duration="100" />
+        android:duration="300" />
     <item
         android:drawable="@mipmap/image2"
-        android:duration="100" />
+        android:duration="300" />
     <!--  省略...  -->
-    <item
-        android:drawable="@mipmap/image3"
-        android:duration="100" />
-    <item
-        android:drawable="@mipmap/image4"
-        android:duration="100" />
 
 </animation-list>

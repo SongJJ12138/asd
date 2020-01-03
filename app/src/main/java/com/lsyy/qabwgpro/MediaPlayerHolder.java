@@ -17,7 +17,7 @@ public class MediaPlayerHolder implements PlayerAdapterListener {
     public static int PLAYSTATUS5=5;//媒体流加载中
     public static int PLAYSTATUSD1=-1;//错误
 
-    public int PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 1000;
+    public int PLAYBACK_POSITION_REFRESH_INTERVAL_MS = 300;
     private String TAG = MediaPlayerHolder.class.getSimpleName();
     private MediaPlayer mMediaPlayer;
     private ScheduledExecutorService mExecutor;//开启线程
@@ -214,12 +214,11 @@ public class MediaPlayerHolder implements PlayerAdapterListener {
                 }
             };
         }
-
         mExecutor.scheduleAtFixedRate(
                 mSeekbarPositionUpdateTask,
                 0,
-                PLAYBACK_POSITION_REFRESH_INTERVAL_MS,
-                TimeUnit.MILLISECONDS
+                1,
+                TimeUnit.SECONDS
         );
     }
 
@@ -273,7 +272,6 @@ public class MediaPlayerHolder implements PlayerAdapterListener {
         int duration = mMediaPlayer.getDuration();//获取总时长
         if (mPlaybackInfoListener != null) {
             mPlaybackInfoListener.onDurationChanged(duration);
-            mPlaybackInfoListener.onPositionChanged(0);
             mPlaybackInfoListener.onStateChanged(PLAYSTATUS4);
         }
     }
