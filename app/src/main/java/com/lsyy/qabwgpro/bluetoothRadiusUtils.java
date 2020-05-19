@@ -24,9 +24,9 @@ public class bluetoothRadiusUtils {
      */
     private bluetoothRadiusUtils(Context context) {
         //离线使用
-//        copyAssetsToDst(MainActivity.this,"LocateDatas","Joysuch/LocateDatas");
-//        JSLocateManager.getInstance().setOfflineMode();//定位数据内置APP情况
-//        JSLocateManager.getInstance().setRootFolderName("Joysuch");//自定义数据存储文件夹
+        copyAssetsToDst(context,"LocateDatas","Joysuch/LocateDatas");
+        JSLocateManager.getInstance().setOfflineMode();//定位数据内置APP情况
+        JSLocateManager.getInstance().setRootFolderName("Joysuch");//自定义数据存储文件夹
         jsLocateManager=JSLocateManager.getInstance();
         jsLocateManager.init(context);
     }
@@ -45,7 +45,6 @@ public class bluetoothRadiusUtils {
         return bluetoothRadiusUtils;
     }
     public void getRadius(IndoorLocateListener indoorLocateListener){
-
         jsLocateManager.setOnIndoorLocateListener(indoorLocateListener);
         jsLocateManager.setLocateTimesSecond(2);
         jsLocateManager.start();

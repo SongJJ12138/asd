@@ -2,29 +2,26 @@ package com.lsyy.qabwgpro;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.joysuch.sdk.IndoorLocateListener;
 import com.joysuch.sdk.locate.JSPosition;
+import com.shehuan.niv.NiceImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,45 +35,26 @@ import okhttp3.Call;
 
 public class MainActivity extends Activity implements IndoorLocateListener, OkHttpUtil.NetCall, MediaPlayerHolder.PlaybackInfoListener, SeekBar.OnSeekBarChangeListener {
     public static String TAG = "SMALLPIG";
-    @BindView(R.id.bt_title_back)
-    LinearLayout btTitleBack;
-    @BindView(R.id.tv_title_text)
-    TextView tvTitleText;
-    @BindView(R.id.bt_daolan_showContent)
-    ImageView btDaolanShowContent;
-    @BindView(R.id.bt_daolan_dismissContent)
-    ImageView btDaolanDismissContent;
-    @BindView(R.id.im_daolan_pic)
-    ImageView imDaolanPic;
-    @BindView(R.id.tv_daolan_str)
-    TextView tvDaolanStr;
+    @BindView(R.id.img_background)
+    ImageView imgBackground;
     @BindView(R.id.layout_daolan_flame)
     FrameLayout layoutDaolanFlame;
-    @BindView(R.id.layout_daolan_small)
-    LinearLayout layoutDaolanSmall;
-    @BindView(R.id.layout_daolan_dig)
-    LinearLayout layoutDaolanDig;
-    @BindView(R.id.image)
-    ImageView image;
-    @BindView(R.id.mine_weizhi)
-    ImageView im_Weizhi;
-    //播放器
-    @BindView(R.id.bt_daolan_play)
-    ImageView btDaolanPlay;
-    @BindView(R.id.tv_daolan_seekbar)
-    SeekBar tvDaolanSeekbar;
-    @BindView(R.id.tv_daolan_playtime)
-    TextView tvDaolanPlaytime;
-    @BindView(R.id.tv_daolan_alltime)
-    TextView tvDaolanAlltime;
-    @BindView(R.id.im_background)
-    ImageView imBackground;
+    @BindView(R.id.bt_daolan_showContent)
+    TextView btDaolanShowContent;
+    @BindView(R.id.bt_play)
+    NiceImageView btPlay;
+    @BindView(R.id.seekbar)
+    SeekBar seekbar;
+    @BindView(R.id.tv_playtime)
+    TextView tvPlaytime;
+    @BindView(R.id.tv_alltime)
+    TextView tvAlltime;
     //语言分类
     private int LanguageType = 1;
     //商户id
     private String ID;
     //产品id
-    private String product_id;
+    private Long product_id;
     //产品详情
     private DaolanDetailsBean bean;
     //判断获取的数据是否为详细数据
@@ -103,9 +81,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                         } else {
                             JSONObject jsonObject = new JSONObject(response);
                             if (jsonObject != null && jsonObject.getString("status").equals("200")) {
-                                product_id = 1 + "";
+                                product_id = 1L;
                                 isDetails = true;
-                                getData(ID + "/" + product_id);
+                                getData("2452/" + product_id);
                             } else {
                                 Toast.makeText(getApplicationContext(), "数据请求失败，请稍后重试", Toast.LENGTH_LONG).show();
                                 MainActivity.this.finish();
@@ -116,13 +94,12 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                     }
                     break;
                 case 202:
-                    int position= (int) msg.obj;
-                    tvDaolanSeekbar.setProgress(position);
-                    if (position==0){
-                        tvDaolanPlaytime.setText("00 : 00");
-                    }else{
-                        String ttt=getTime(position);
-                        tvDaolanPlaytime.setText(ttt);
+                    int position = (int) msg.obj;
+                    if (position == 0) {
+                        tvPlaytime.setText("00 : 00");
+                    } else {
+                        String ttt = getTime(position);
+                        tvPlaytime.setText(ttt);
                     }
                     break;
                 case 404:
@@ -135,17 +112,17 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         ViewGroup group = findViewById(R.id.layout_daolan_flame);
         for (DaolanDetailsBean.DataBean data : bean.getData()) {
             ImageView imageView = new ImageView(getApplicationContext());
-            imageView.setBackground(getResources().getDrawable(R.mipmap.red));
+            imageView.setBackground(getResources().getDrawable(R.mipmap.icon_jjd));
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-            params.width =20;
-            params.height =20;
-            int width = layoutDaolanFlame.getWidth();
-            int height = layoutDaolanFlame.getHeight();
-//            float xx = (float) ((width / 91) * 91);
-//            float yy = (float) ((height / 106) *106);
-            float xx = (float) ((width / 91) * Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLongitude() : 0 + ""));
-            float yy = (float) ((height / 106) * Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLatitude() : 0 + ""));
-           if (xx==0||yy==0){break;}
+            params.width = 30;
+            params.height = 30;
+            int width = imgBackground.getWidth();
+            int height = imgBackground.getHeight();
+            float xx = (float) ((width / 56) * (Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLongitude() : 0 + "") - 22.9386));
+            float yy = (float) ((height / 66.03) * (Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLatitude() : 0 + "") - 10.9398));
+            if (xx == 0 || yy == 0) {
+                break;
+            }
             imageView.setTranslationX(xx);
             imageView.setTranslationY(yy);
             imageView.setLayoutParams(params);
@@ -159,23 +136,22 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        ViewTreeObserver vto = imgBackground.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                ViewGroup.LayoutParams para;
+                para = imgBackground.getLayoutParams();
+                int width = imgBackground.getWidth();
+                para.width = width;
+                int Height = (int) (1.18 * width);
+                para.height = Height;
+                imgBackground.setLayoutParams(para);
+            }
+        });
+//        getData(2452 + "");
         bluetoothRadiusUtils.getInstance(MainActivity.this).getRadius(this);
-//        Intent intent=getIntent();
-//        String id=intent.getStringExtra("ID");
-        AnimationDrawable animationDrawable = (AnimationDrawable) image.getDrawable();
-        animationDrawable.start();
-        ID = 2452 + "";
-        getData(ID);
-        initMedia();
-        tvDaolanSeekbar.setOnSeekBarChangeListener(this);
-    }
-
-    /**
-     * 初始化音频播放器
-     */
-    private void initMedia() {
-        mediaPlayerIngHolder = new MediaPlayerHolder();
-        mediaPlayerIngHolder.setmPlaybackInfoListener(this);//设置监听
+//        initMedia();
     }
 
     /**
@@ -191,6 +167,93 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         }
     }
 
+    @Override
+    public void success(Call call, String response) throws IOException {
+        Message msg = new Message();
+        msg.what = 200;
+        msg.obj = response;
+        handler.sendMessage(msg);
+    }
+
+    @Override
+    public void failed(Call call, IOException e) {
+        handler.sendEmptyMessage(404);
+    }
+
+
+    /**
+     * 初始化音频播放器
+     */
+    private void initMedia() {
+        mediaPlayerIngHolder = new MediaPlayerHolder();
+        mediaPlayerIngHolder.setmPlaybackInfoListener(this);//设置监听
+    }
+
+    /**
+     * 总时长改变（变音频）
+     *
+     * @param duration
+     */
+    @Override
+    public void onDurationChanged(int duration) {
+
+    }
+
+    /**
+     * 当前播放时长改变（拖动）
+     *
+     * @param position
+     */
+    @Override
+    public void onPositionChanged(int position) {
+        Message msg = new Message();
+        msg.what = 202;
+        msg.obj = position;
+        handler.sendMessage(msg);
+
+    }
+
+    /**
+     * 播放状态改变
+     *
+     * @param state
+     */
+    @Override
+    public void onStateChanged(int state) {
+        switch (state) {
+
+        }
+    }
+
+    /**
+     * 播放完成回调
+     */
+    @Override
+    public void onPlaybackCompleted() {
+
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mediaPlayerIngHolder.seekTo(seekBar.getProgress());
+    }
+
+
+    /**
+     * 接受蓝牙定位回调
+     *
+     * @param jsPosition
+     */
     @Override
     public void onReceivePosition(JSPosition jsPosition) {
         String result = "User ID:" + jsPosition.getUserID() + "\r\n";
@@ -214,17 +277,17 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         }
         switch (LanguageType) {
             case 1:
-                String url="http://www.guolaiwan.net/file"+dataBean.getChineseBoy();
+                String url = "http://www.guolaiwan.net/file" + dataBean.getChineseBoy();
                 mediaPlayerIngHolder.loadMedia(url);
                 break;
             case 2:
-                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getChineseGirl());
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file" + dataBean.getChineseGirl());
                 break;
             case 3:
-                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getEnglishBoy());
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file" + dataBean.getEnglishBoy());
                 break;
             case 4:
-                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file"+dataBean.getEnglishGirl());
+                mediaPlayerIngHolder.loadMedia("http://www.guolaiwan.net/file" + dataBean.getEnglishGirl());
                 break;
             default:
                 break;
@@ -263,147 +326,61 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      * @param getyMeters
      */
     private void changeView(double getxMeters, double getyMeters) {
-        int width = layoutDaolanFlame.getWidth();
-        int height = layoutDaolanFlame.getHeight();
-        int xx = (int) (width / 91 * getxMeters);
-        int yy = (int) (height / 106 * getyMeters);
-        im_Weizhi.setTranslationX(xx);
-        im_Weizhi.setTranslationY(yy);
+        ViewGroup group = findViewById(R.id.layout_daolan_flame);
+        ImageView imageView = new ImageView(getApplicationContext());
+        imageView.setBackground(getResources().getDrawable(R.mipmap.asd));
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        params.width = 30;
+        params.height = 30;
+        int width = imgBackground.getWidth();
+        int height = imgBackground.getHeight();
+        float xx = (float) ((width / 56) * getxMeters- 22.9386);
+        float yy = (float) ((height / 66.03) * getyMeters- 10.9398);
+        imageView.setTranslationX(xx);
+        imageView.setTranslationY(yy);
+        imageView.setLayoutParams(params);
+        group.addView(imageView);
     }
 
-    @OnClick({R.id.bt_title_back, R.id.bt_daolan_showContent,R.id.bt_daolan_play, R.id.bt_daolan_dismissContent})
+    @OnClick({R.id.title_back})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.bt_title_back:
+            case R.id.title_back:
                 this.finish();
-                break;
-            case R.id.bt_daolan_showContent:
-                if (dataBean == null) {
-                    Toast.makeText(getApplicationContext(), "还未到讲解点哦！", Toast.LENGTH_SHORT).show();
-                } else {
-                    Glide.with(getApplicationContext())
-                            .load(dataBean.getChildPic())
-                            .into(imDaolanPic);
-                    tvDaolanStr.setText(dataBean.getChineseContent());
-                    AnimationUtil.startAlphaAnima(layoutDaolanSmall, 1, 0);
-                    AnimationUtil.startAlphaAnima(layoutDaolanDig, 0, 1);
-                }
-                break;
-            case R.id.bt_daolan_dismissContent:
-                AnimationUtil.startAlphaAnima(layoutDaolanSmall, 0, 1);
-                AnimationUtil.startAlphaAnima(layoutDaolanDig, 1, 0);
-                break;
-            case R.id.bt_daolan_play:
-                if (mediaPlayerIngHolder.isPlaying()){
-                    mediaPlayerIngHolder.pause();
-                }else{
-                    if (dataBean==null){
-                        Toast.makeText(getApplicationContext(), "还未到讲解点哦！", Toast.LENGTH_SHORT).show();
-                    }else{
-                        mediaPlayerIngHolder.play();
-                    }
-
-                }
                 break;
         }
     }
 
 
-    @Override
-    public void success(Call call, String response) throws IOException {
-        Message msg = new Message();
-        msg.what = 200;
-        msg.obj = response;
-        handler.sendMessage(msg);
-    }
-
-    @Override
-    public void failed(Call call, IOException e) {
-        handler.sendEmptyMessage(404);
-    }
-
     /**
      * 时间转换
+     *
      * @param duration
      * @return
      */
     private String getTime(int duration) {
-        int time=duration/1000;
-        int min=time/60;
-        int second=time%60;
-        if (min>10){
-            if (second>=10){
-                return min+" : "+second;
-            }else{
-                return min+" : 0"+second;
+        int time = duration / 1000;
+        int min = time / 60;
+        int second = time % 60;
+        if (min > 10) {
+            if (second >= 10) {
+                return min + " : " + second;
+            } else {
+                return min + " : 0" + second;
             }
-        }else if(min>1&&min<10){
-            if (second>=10){
-                return "0"+min+" : "+second;
-            }else{
-                return "0"+min+" : 0"+second;
+        } else if (min > 1 && min < 10) {
+            if (second >= 10) {
+                return "0" + min + " : " + second;
+            } else {
+                return "0" + min + " : 0" + second;
             }
-        }else{
-            if (second>=10){
-                return "00"+" : "+second;
-            }else{
-                return "00"+" : 0"+second;
+        } else {
+            if (second >= 10) {
+                return "00" + " : " + second;
+            } else {
+                return "00" + " : 0" + second;
             }
         }
     }
-    @Override
-    public void onDurationChanged(int duration) {
-        tvDaolanAlltime.setText(getTime(duration));
-        tvDaolanPlaytime.setText("00 : 00");
-        mediaPlayerIngHolder.play();
-        btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.pause));
-        tvDaolanSeekbar.setMax(duration);
-    }
 
-
-
-    @Override
-    public void onPositionChanged(int position) {
-        Message msg=new Message();
-        msg.what=202;
-        msg.obj=position;
-        handler.sendMessage(msg);
-
-    }
-//    public static int PLAYSTATUS0=0;//正在播放
-//    public static int PLAYSTATUS1=1;//暂停播放
-//    public static int PLAYSTATUS2=2;//重置
-//    public static int PLAYSTATUS3=3;//播放完成
-//    public static int PLAYSTATUS4=4;//媒体流装载完成
-//    public static int PLAYSTATUS5=5;//媒体流加载中
-//    public static int PLAYSTATUSD1=-1;//错误
-    @Override
-    public void onStateChanged(int state) {
-        switch (state){
-            case 0: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.pause)); break;
-            case 1: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
-            case 2: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
-            case 3: btDaolanPlay.setBackground(getResources().getDrawable(R.mipmap.play));break;
-        }
-    }
-
-    @Override
-    public void onPlaybackCompleted() {
-
-    }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        mediaPlayerIngHolder.seekTo(seekBar.getProgress());
-    }
 }

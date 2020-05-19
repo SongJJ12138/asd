@@ -60,7 +60,7 @@
     <color name="gainsboro">#dcdcdc</color> <!-- 淡灰色 -->
     <color name="crimson">#dc143c</color> <!-- 暗深红色 -->
     <color name="palevioletred">#db7093</color> <!-- 苍紫罗兰色 -->
-    <color name="goldenrod">#daa520</color> <!-- 金麒麟色 -->
+    <color name="goldenrod">#7BE77D</color> <!-- 金麒麟色 -->
     <color name="orchid">#da70d6</color> <!-- 淡紫色 -->
     <color name="thistle">#d8bfd8</color> <!-- 蓟色 -->
     <color name="lightgray">#d3d3d3</color> <!-- 亮灰色 -->
@@ -136,7 +136,7 @@
     <color name="aqua">#00ffff</color> <!-- 浅绿色 -->
     <color name="cyan">#00ffff</color> <!-- 青色 -->
     <color name="springgreen">#00ff7f</color> <!-- 春绿色 -->
-    <color name="lime">#00ff00</color> <!-- 酸橙色 -->
+    <color name="lime">#4BE04B</color> <!-- 酸橙色 -->
     <color name="mediumspringgreen">#00fa9a</color> <!-- 中春绿色 -->
     <color name="darkturquoise">#00ced1</color> <!-- 暗宝石绿 -->
     <color name="deepskyblue">#00bfff</color> <!-- 深天蓝色 -->
