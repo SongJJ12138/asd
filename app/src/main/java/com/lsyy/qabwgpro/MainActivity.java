@@ -49,6 +49,8 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     TextView tvPlaytime;
     @BindView(R.id.tv_alltime)
     TextView tvAlltime;
+    @BindView(R.id.asd)
+    TextView asd;
     //语言分类
     private int LanguageType = 1;
     //商户id
@@ -63,6 +65,8 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     private MediaPlayerHolder mediaPlayerIngHolder;
     //当前所在将节点数据
     private DaolanDetailsBean.DataBean dataBean;
+    private    FrameLayout.LayoutParams layoutParams;
+    ImageView imageView ;
     private double Staticx = 0;
     private double Staticy = 0;
     @SuppressLint("HandlerLeak")
@@ -102,6 +106,24 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                         tvPlaytime.setText(ttt);
                     }
                     break;
+                case 666:
+                    asd.setText(result);
+                    break;
+                case 555:
+                    ViewGroup group = findViewById(R.id.layout_daolan_flame);
+                    group.removeView(imageView);
+                    imageView.setBackground(getResources().getDrawable(R.mipmap.asd));
+                    layoutParams.width = 30;
+                    layoutParams.height = 30;
+                    int width = imgBackground.getWidth();
+                    int height = imgBackground.getHeight();
+                    float xx = (float) ((width / 56) * getxMeters- 22.9386);
+                    float yy = (float) ((height / 66.03) * getyMeters- 10.9398);
+                    imageView.setTranslationX(xx);
+                    imageView.setTranslationY(yy);
+                    imageView.setLayoutParams(layoutParams);
+                    group.addView(imageView);
+                    break;
                 case 404:
                     break;
             }
@@ -113,9 +135,8 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         for (DaolanDetailsBean.DataBean data : bean.getData()) {
             ImageView imageView = new ImageView(getApplicationContext());
             imageView.setBackground(getResources().getDrawable(R.mipmap.icon_jjd));
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-            params.width = 30;
-            params.height = 30;
+            layoutParams.width = 30;
+            layoutParams.height = 30;
             int width = imgBackground.getWidth();
             int height = imgBackground.getHeight();
             float xx = (float) ((width / 56) * (Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLongitude() : 0 + "") - 22.9386));
@@ -125,7 +146,13 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
             }
             imageView.setTranslationX(xx);
             imageView.setTranslationY(yy);
-            imageView.setLayoutParams(params);
+            imageView.setLayoutParams(layoutParams);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(),Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLongitude() : 0 + "")+":"+Double.parseDouble(!data.getChildLatitude().equals("") ? data.getChildLatitude() : 0 + ""),Toast.LENGTH_SHORT).show();
+                }
+            });
             group.addView(imageView);
         }
     }
@@ -135,6 +162,8 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        imageView = new ImageView(getApplicationContext());
+        layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         ButterKnife.bind(this);
         ViewTreeObserver vto = imgBackground.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -149,9 +178,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
                 imgBackground.setLayoutParams(para);
             }
         });
-//        getData(2452 + "");
+        getData(2452 + "");
         bluetoothRadiusUtils.getInstance(MainActivity.this).getRadius(this);
-//        initMedia();
+        initMedia();
     }
 
     /**
@@ -221,7 +250,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
     @Override
     public void onStateChanged(int state) {
         switch (state) {
-
+            case 4:
+                mediaPlayerIngHolder.play();
+                break;
         }
     }
 
@@ -248,7 +279,7 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
         mediaPlayerIngHolder.seekTo(seekBar.getProgress());
     }
 
-
+   String result="";
     /**
      * 接受蓝牙定位回调
      *
@@ -256,13 +287,14 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      */
     @Override
     public void onReceivePosition(JSPosition jsPosition) {
-        String result = "User ID:" + jsPosition.getUserID() + "\r\n";
+        result = "User ID:" + jsPosition.getUserID() + "\r\n";
         result += "Error code:" + String.valueOf(jsPosition.getErrorCode()) + "\r\n";
         result += "Build ID:" + String.valueOf(jsPosition.getBuildID()) + "\r\n";
         result += "Floor ID:" + String.valueOf(jsPosition.getFloorID()) + "\r\n";
         result += "X:" + String.valueOf(jsPosition.getxMeters()) + "\r\n";
         result += "Y:" + String.valueOf(jsPosition.getyMeters()) + "\r\n";
         changeView(jsPosition.getxMeters(), jsPosition.getyMeters());
+        handler.sendEmptyMessage(666);
         if (checkAddress(jsPosition.getxMeters(), jsPosition.getyMeters())) {
             changeSite();
         }
@@ -272,9 +304,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      * 更换降解点
      */
     private void changeSite() {
-        if (mediaPlayerIngHolder.isPlaying()) {
-            mediaPlayerIngHolder.release();
-        }
+//        if (mediaPlayerIngHolder.isPlaying()) {
+//            mediaPlayerIngHolder.release();
+//        }
         switch (LanguageType) {
             case 1:
                 String url = "http://www.guolaiwan.net/file" + dataBean.getChineseBoy();
@@ -300,25 +332,27 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      * @return
      */
     private Boolean checkAddress(double x, double y) {
-        //判断移动距离是否大于0.5m
+        //判断移动距离是否大于1m
         if (AddressUtils.distance(x, y, Staticx, Staticy) > 0.5) {
-            //分别判断距离是否在范围内
+            //分别判断讲解点位置是否在定位范围内
             for (DaolanDetailsBean.DataBean bean : bean.getData()) {
-                Double childX = Double.parseDouble(bean.getChildLatitude());
-                Double childY = Double.parseDouble(bean.getChildLongitude());
-                if (AddressUtils.distance(x, y, childX, childY) > 0.5) {
-                    //判断角度是否合适
-                    int range = AddressUtils.disrange(x, y, Staticx, Staticy);
-                    if (range > Integer.parseInt(bean.getStartAngle()) && range < Integer.parseInt(bean.getEndAngle())) {
-                        dataBean = bean;
-                        return true;
-                    }
+                Double childX = Double.parseDouble(bean.getChildLongitude());
+                Double childY = Double.parseDouble(bean.getChildLatitude());
+                if (AddressUtils.distance(x, y   , childX- 22.9386, childY- 10.9398) < 1) {
+//                    //判断角度是否合适
+//                    int range = AddressUtils.disrange(x, y, Staticx, Staticy);
+//                    if (range > Integer.parseInt(bean.getStartAngle()) && range < Integer.parseInt(bean.getEndAngle())) {
+//                    }
+                    dataBean = bean;
+                    Staticx=x;
+                    Staticy=y;
+                    return true;
                 }
             }
         }
         return false;
     }
-
+    double getxMeters; double getyMeters;
     /**
      * 更改定位显示
      *
@@ -326,20 +360,9 @@ public class MainActivity extends Activity implements IndoorLocateListener, OkHt
      * @param getyMeters
      */
     private void changeView(double getxMeters, double getyMeters) {
-        ViewGroup group = findViewById(R.id.layout_daolan_flame);
-        ImageView imageView = new ImageView(getApplicationContext());
-        imageView.setBackground(getResources().getDrawable(R.mipmap.asd));
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-        params.width = 30;
-        params.height = 30;
-        int width = imgBackground.getWidth();
-        int height = imgBackground.getHeight();
-        float xx = (float) ((width / 56) * getxMeters- 22.9386);
-        float yy = (float) ((height / 66.03) * getyMeters- 10.9398);
-        imageView.setTranslationX(xx);
-        imageView.setTranslationY(yy);
-        imageView.setLayoutParams(params);
-        group.addView(imageView);
+        this.getxMeters=getxMeters;
+        this.getyMeters=getyMeters;
+      handler.sendEmptyMessage(555);
     }
 
     @OnClick({R.id.title_back})

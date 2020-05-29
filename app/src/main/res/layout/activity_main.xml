@@ -25,6 +25,7 @@
         android:orientation="vertical"
         android:layout_weight="1">
         <TextView
+            android:id="@+id/asd"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -34,7 +35,6 @@
             android:drawablePadding="5dp"
             android:textSize="16sp"
             android:textColor="@color/white"
-            android:lines="2"
             android:ellipsize="end"
             android:text="迁安博物馆现有馆藏文物1000余件，包括骨器、石器、石刻、铜器、铁器、陶器、货币、绘画、书法及近迁安博物馆现代文物等十几个类别。其中国家一级文物2件，二级文物7件，三级文物51件。既有弥足珍贵的骨针和骨锥、凝重威严的商代铭纹鼎，又有俊雅的辽代白釉印花杯盘，更有清新飘逸的元代钧窑瓷器，精美绝伦，令人称奇。"
             android:drawableLeft="@mipmap/img_bowuguan"/>
